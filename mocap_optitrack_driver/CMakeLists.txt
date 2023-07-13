@@ -11,10 +11,11 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-set(LIBNATNET_SDK_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/NatNetSDK/lib/libNatNet.so)
-set(NATNET_INCLUDE_DIR
-  ${CMAKE_CURRENT_SOURCE_DIR}/NatNetSDK/include
-)
+if(WIN32)
+  set(LIBNATNET_SDK_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/NatNetSDK/lib/x64/NatNetLib.lib)
+else()
+  set(LIBNATNET_SDK_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/NatNetSDK/lib/libNatNet.so)
+endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -41,10 +42,17 @@ include_directories(
   ${NATNET_INCLUDE_DIR}
 )
 
-execute_process(
-	COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/install_sdk.py
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+if(WIN32)
+  execute_process(
+    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/install_sdk.py
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+else()
+  execute_process(
+    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/install_sdk.py
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+endif()
 
 add_library(${PROJECT_NAME} 
   src/mocap_optitrack_driver/mocap_optitrack_driver.cpp)
